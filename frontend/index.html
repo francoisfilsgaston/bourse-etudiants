@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Candidature - Bourse d'études</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+            BourseÉtudiant
+        </div>
+
+        <nav>
+            <a href="#">
+                <i class="fa-solid fa-house"></i>
+                Accueil
+            </a>
+
+            <a href="#candidature">
+                <i class="fa-solid fa-file-pen"></i>
+                Candidature
+            </a>
+        </nav>
+    </header>
+
+
+    <main>
+
+        <!-- Présentation -->
+        <section class="hero">
+            <div>
+                <span class="badge">
+                    <i class="fa-solid fa-star"></i>
+                    Nouvelle campagne
+                </span>
+
+                <h1>
+                    Postulez à votre
+                    <span>bourse d'études</span>
+                </h1>
+
+                <p>
+                    Remplissez le formulaire de candidature et choisissez
+                    le pays ainsi que l'université où vous souhaitez poursuivre
+                    vos études.
+                </p>
+            </div>
+        </section>
+
+
+        <!-- Formulaire -->
+        <section class="form-section" id="candidature">
+
+            <div class="form-header">
+                <div class="form-icon">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+
+                <div>
+                    <h2>Formulaire de candidature</h2>
+                    <p>Les informations essentielles du candidat.</p>
+                </div>
+            </div>
+
+
+            <form id="candidatureForm">
+
+                <!-- Informations personnelles -->
+                <div class="form-block">
+
+                    <h3>
+                        <i class="fa-solid fa-user"></i>
+                        Informations personnelles
+                    </h3>
+
+                    <div class="form-grid">
+
+                        <div class="input-group">
+                            <label for="nom">Nom</label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-user"></i>
+
+                                <input type="text" id="nom" name="nom" placeholder="Votre nom" required>
+                            </div>
+                        </div>
+
+
+                        <div class="input-group">
+                            <label for="prenom">Prénom</label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-user"></i>
+
+                                <input type="text" id="prenom" name="prenom" placeholder="Votre prénom" required>
+                            </div>
+                        </div>
+
+
+                        <div class="input-group">
+                            <label for="email">Adresse email</label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-envelope"></i>
+
+                                <input type="email" id="email" name="email" placeholder="exemple@email.com" required>
+                            </div>
+                        </div>
+
+
+                        <div class="input-group">
+                            <label for="telephone">Téléphone</label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-phone"></i>
+
+                                <input type="tel" id="telephone" name="telephone" placeholder="+243..." required>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Informations académiques -->
+                <div class="form-block">
+
+                    <h3>
+                        <i class="fa-solid fa-book-open"></i>
+                        Informations académiques
+                    </h3>
+
+                    <div class="form-grid">
+
+                        <div class="input-group">
+                            <label for="niveau">Niveau d'étude</label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-layer-group"></i>
+
+                                <select id="niveau" name="niveau" required>
+                                    <option value="">
+                                        Sélectionnez votre niveau
+                                    </option>
+
+                                    <option value="licence">
+                                        Licence / Bachelor
+                                    </option>
+
+                                    <option value="master">
+                                        Master
+                                    </option>
+
+                                    <option value="doctorat">
+                                        Doctorat
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="input-group">
+                            <label for="filiere">Domaine / Filière</label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-graduation-cap"></i>
+
+                                <input type="text" id="filiere" name="filiere" placeholder="Ex : Génie informatique"
+                                    required>
+                            </div>
+                        </div>
+
+
+                        <div class="input-group full">
+
+                            <label for="universiteActuelle">
+                                Université actuelle
+                            </label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-building-columns"></i>
+
+                                <input type="text" id="universiteActuelle" name="universiteActuelle"
+                                    placeholder="Nom de votre université" required>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Destination -->
+                <div class="form-block">
+
+                    <h3>
+                        <i class="fa-solid fa-earth-africa"></i>
+                        Destination souhaitée
+                    </h3>
+
+                    <div class="form-grid">
+
+                        <!-- Pays API -->
+                        <div class="input-group">
+
+                            <label for="pays">
+                                Pays souhaité
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-earth-americas"></i>
+
+                                <select id="pays" name="pays" required>
+
+                                    <option value="">
+                                        Chargement des pays...
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Université API -->
+                        <div class="input-group">
+
+                            <label for="universite">
+                                Université souhaitée
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-university"></i>
+
+                                <select id="universite" name="universite" disabled required>
+
+                                    <option value="">
+                                        Choisissez d'abord un pays
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Motivation -->
+                <div class="form-block">
+
+                    <h3>
+                        <i class="fa-solid fa-comment-dots"></i>
+                        Motivation
+                    </h3>
+
+                    <div class="input-group">
+
+                        <label for="motivation">
+                            Pourquoi souhaitez-vous obtenir cette bourse ?
+                        </label>
+
+                        <textarea id="motivation" name="motivation" rows="5" maxlength="1000"
+                            placeholder="Présentez brièvement votre motivation..." required></textarea>
+
+                        <small>
+                            Maximum 1000 caractères
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Conditions -->
+                <div class="conditions">
+
+                    <label>
+
+                        <input type="checkbox" id="conditions" required>
+
+                        <span>
+                            Je confirme que les informations fournies
+                            sont exactes.
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <!-- Message -->
+                <div id="message"></div>
+
+
+                <!-- Bouton -->
+                <button type="submit" class="submit-btn">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Soumettre ma candidature
+
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            © 2026 BourseÉtudiant —
+            Plateforme de candidature aux bourses
+        </p>
+
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

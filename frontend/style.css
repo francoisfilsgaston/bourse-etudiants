@@ -1,0 +1,479 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    color: #1f2937;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    height: 70px;
+    background: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 8%;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    font-size: 21px;
+    font-weight: bold;
+
+    color: #2563eb;
+}
+
+.logo i {
+    font-size: 25px;
+}
+
+nav {
+    display: flex;
+    gap: 25px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #4b5563;
+
+    font-size: 15px;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+nav a:hover {
+    color: #2563eb;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    background: linear-gradient(135deg,
+            #2563eb,
+            #1d4ed8);
+
+    color: white;
+
+    padding: 70px 8%;
+}
+
+.hero>div {
+    max-width: 800px;
+}
+
+.badge {
+    display: inline-block;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    padding: 8px 14px;
+
+    border-radius: 30px;
+
+    font-size: 13px;
+
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 42px;
+
+    line-height: 1.2;
+
+    margin-bottom: 20px;
+}
+
+.hero h1 span {
+    color: #bfdbfe;
+}
+
+.hero p {
+    max-width: 650px;
+
+    line-height: 1.7;
+
+    color: #e0e7ff;
+
+    font-size: 17px;
+}
+
+
+/* =========================
+   FORMULAIRE
+========================= */
+
+.form-section {
+    max-width: 1000px;
+
+    margin: 45px auto;
+
+    background: white;
+
+    border-radius: 15px;
+
+    padding: 35px;
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+}
+
+.form-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding-bottom: 25px;
+
+    margin-bottom: 25px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-icon {
+    width: 50px;
+    height: 50px;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+}
+
+.form-header h2 {
+    font-size: 24px;
+
+    margin-bottom: 5px;
+}
+
+.form-header p {
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================
+   BLOCS
+========================= */
+
+.form-block {
+    margin-bottom: 35px;
+}
+
+.form-block h3 {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    font-size: 18px;
+
+    margin-bottom: 20px;
+
+    color: #111827;
+}
+
+.form-block h3 i {
+    color: #2563eb;
+}
+
+
+/* =========================
+   GRID
+========================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.input-group.full {
+    grid-column: 1 / -1;
+}
+
+.input-group label {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #374151;
+}
+
+
+/* =========================
+   INPUT
+========================= */
+
+.input-box {
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    padding: 0 13px;
+
+    transition: 0.2s;
+}
+
+.input-box:focus-within {
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.input-box i {
+    color: #9ca3af;
+
+    width: 18px;
+
+    text-align: center;
+}
+
+.input-box input,
+.input-box select {
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    font-size: 14px;
+
+    color: #374151;
+}
+
+.input-box select {
+    cursor: pointer;
+}
+
+
+/* =========================
+   TEXTAREA
+========================= */
+
+textarea {
+    width: 100%;
+
+    resize: vertical;
+
+    min-height: 130px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    padding: 13px;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 14px;
+}
+
+textarea:focus {
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.input-group small {
+    color: #9ca3af;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   CONDITIONS
+========================= */
+
+.conditions {
+    margin-bottom: 20px;
+
+    padding: 15px;
+
+    background: #f9fafb;
+
+    border-radius: 8px;
+}
+
+.conditions label {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    font-size: 14px;
+
+    color: #4b5563;
+
+    cursor: pointer;
+}
+
+.conditions input {
+    margin-top: 2px;
+
+    accent-color: #2563eb;
+}
+
+
+/* =========================
+   BOUTON
+========================= */
+
+.submit-btn {
+    width: 100%;
+
+    height: 50px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    transition: 0.2s;
+}
+
+.submit-btn:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+#message {
+    margin-bottom: 15px;
+
+    font-size: 14px;
+
+    text-align: center;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    text-align: center;
+
+    padding: 30px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+
+    .header {
+        padding: 0 5%;
+    }
+
+    nav {
+        display: none;
+    }
+
+    .hero {
+        padding: 50px 5%;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .form-section {
+        margin: 25px 15px;
+
+        padding: 25px 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .input-group.full {
+        grid-column: auto;
+    }
+
+}
