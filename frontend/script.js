@@ -32,7 +32,7 @@ async function chargerPays() {
     try {
 
         const response =
-            await fetch(`${API}/pays`);
+            await fetch(`${API}/api/pays`);
 
 
         if (!response.ok) {
@@ -164,7 +164,7 @@ async function chargerUniversites(pays) {
     try {
 
         const response = await fetch(
-            `${API}/universites?country=${encodeURIComponent(pays)}`
+            `${API}/api/universites?country=${encodeURIComponent(pays)}`
         );
 
 
