@@ -111,7 +111,7 @@ async function chargerPays() {
 
 
             option.textContent =
-                paysItem.name;
+                `${paysItem.flag || "🌍"} ${paysItem.name}`;
 
 
             paysSelect.appendChild(option);

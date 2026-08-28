@@ -83,7 +83,13 @@ app.get("/api/pays", async (req, res) => {
                 .map(([code, name]) => ({
                     name,
                     code,
-                    flag: ""
+                    flag: code
+                        .toUpperCase()
+                        .replace(/[A-Z]/g, letter =>
+                            String.fromCodePoint(
+                                127397 + letter.charCodeAt(0)
+                            )
+                        )
                 }))
                 .filter(country => country.name);
 
