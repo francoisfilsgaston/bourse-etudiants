@@ -298,6 +298,29 @@ nav a:hover {
     cursor: pointer;
 }
 
+.phone-fields {
+    display: flex;
+    gap: 10px;
+}
+
+.phone-code-box {
+    flex: 0 0 135px;
+}
+
+.phone-number-box {
+    flex: 1;
+}
+
+@media (max-width: 520px) {
+    .phone-fields {
+        gap: 6px;
+    }
+
+    .phone-code-box {
+        flex-basis: 112px;
+    }
+}
+
 
 /* =========================
    TEXTAREA

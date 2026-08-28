@@ -5,6 +5,17 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+const phoneLengths = {
+    CD: [9, 9], FR: [9, 9], CG: [9, 9], CM: [9, 9], CI: [10, 10],
+    SN: [9, 9], BJ: [10, 10], BF: [8, 8], ML: [8, 8], NE: [8, 8],
+    TD: [8, 8], GA: [8, 9], GN: [9, 9], RW: [9, 9], BI: [8, 8],
+    UG: [9, 9], KE: [9, 9], TZ: [9, 9], ZA: [9, 9], NG: [10, 10],
+    GH: [9, 9], GB: [10, 10], DE: [10, 11], BE: [9, 9], CH: [9, 9],
+    ES: [9, 9], IT: [9, 10], PT: [9, 9], MA: [9, 9], DZ: [9, 9],
+    TN: [8, 8], EG: [10, 10], US: [10, 10], CA: [10, 10], IN: [10, 10],
+    CN: [11, 11], JP: [10, 10], AU: [9, 9], BR: [10, 11]
+};
+
 
 // =====================================================
 // MIDDLEWARES
@@ -68,6 +79,19 @@ app.get("/api/pays", async (req, res) => {
         const countries =
             await response.json();
 
+        let phoneCodes = {};
+
+        try {
+            const phoneResponse =
+                await fetch("https://country.io/phone.json");
+
+            if (phoneResponse.ok) {
+                phoneCodes = await phoneResponse.json();
+            }
+        } catch (phoneError) {
+            console.warn("Indicatifs téléphoniques indisponibles :", phoneError.message);
+        }
+
 
         if (!countries || typeof countries !== "object" || Array.isArray(countries)) {
 
@@ -89,7 +113,16 @@ app.get("/api/pays", async (req, res) => {
                             String.fromCodePoint(
                                 127397 + letter.charCodeAt(0)
                             )
-                        )
+                        ),
+                    dialCode: phoneCodes[code]
+                        ? `+${phoneCodes[code]}`
+                        : "",
+                    minLength: phoneLengths[code]
+                        ? phoneLengths[code][0]
+                        : 6,
+                    maxLength: phoneLengths[code]
+                        ? phoneLengths[code][1]
+                        : 15
                 }))
                 .filter(country => country.name);
 

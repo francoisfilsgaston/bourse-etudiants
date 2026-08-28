@@ -3,14 +3,16 @@
 // ==========================================
 
 const form = document.getElementById("candidatureForm");
-
 const paysSelect = document.getElementById("pays");
 
-const universiteSelect =
-    document.getElementById("universite");
+const indicatifTelephoneSelect =
+    document.getElementById("indicatifTelephone");
 
-const message =
-    document.getElementById("message");
+const telephoneInput =
+    document.getElementById("telephone");
+const universiteSelect = document.getElementById("universite");
+
+const message = document.getElementById("message");
 
 
 // ==========================================
@@ -97,6 +99,10 @@ async function chargerPays() {
             a.name.localeCompare(b.name)
         );
 
+        indicatifTelephoneSelect.innerHTML = `
+            <option value="">Code</option>
+        `;
+
 
         // Ajouter les pays
 
@@ -109,6 +115,15 @@ async function chargerPays() {
             option.value =
                 paysItem.name;
 
+            option.dataset.dialCode =
+                paysItem.dialCode || "";
+
+            option.dataset.minLength =
+                paysItem.minLength || 6;
+
+            option.dataset.maxLength =
+                paysItem.maxLength || 15;
+
 
             option.textContent =
                 `${paysItem.flag || "🌍"} ${paysItem.name}`;
@@ -116,7 +131,23 @@ async function chargerPays() {
 
             paysSelect.appendChild(option);
 
+            if (paysItem.dialCode) {
+                const indicatifOption =
+                    document.createElement("option");
+
+                indicatifOption.value =
+                    paysItem.dialCode;
+
+                indicatifOption.textContent =
+                    `${paysItem.flag || "🌍"} ${paysItem.dialCode}`;
+
+                indicatifTelephoneSelect.appendChild(indicatifOption);
+            }
+
         });
+
+        indicatifTelephoneSelect.value = "+243";
+        mettreAJourLongueurTelephone();
 
 
     } catch (error) {
@@ -134,6 +165,38 @@ async function chargerPays() {
         `;
 
     }
+
+}
+
+
+function mettreAJourLongueurTelephone() {
+
+    const paysOption =
+        paysSelect.options[paysSelect.selectedIndex];
+
+    const minLength =
+        Number(paysOption?.dataset.minLength || 6);
+
+    const maxLength =
+        Number(paysOption?.dataset.maxLength || 15);
+
+    telephoneInput.minLength = minLength;
+    telephoneInput.maxLength = maxLength;
+    telephoneInput.placeholder =
+        `Numéro sans indicatif (${minLength}-${maxLength} chiffres)`;
+
+}
+
+
+function synchroniserIndicatifTelephone() {
+
+    const paysOption =
+        paysSelect.options[paysSelect.selectedIndex];
+
+    indicatifTelephoneSelect.value =
+        paysOption?.dataset.dialCode || "+243";
+
+    mettreAJourLongueurTelephone();
 
 }
 
@@ -307,6 +370,8 @@ paysSelect.addEventListener(
             pays
         );
 
+        synchroniserIndicatifTelephone();
+
 
         // Aucun pays
 
@@ -328,6 +393,20 @@ paysSelect.addEventListener(
 
         chargerUniversites(pays);
 
+    }
+);
+
+
+indicatifTelephoneSelect.addEventListener(
+    "change",
+    mettreAJourLongueurTelephone
+);
+
+
+telephoneInput.addEventListener(
+    "input",
+    function () {
+        this.value = this.value.replace(/\D/g, "");
     }
 );
 
@@ -366,9 +445,7 @@ form.addEventListener(
 
 
             telephone:
-                document.getElementById(
-                    "telephone"
-                ).value.trim(),
+                `${indicatifTelephoneSelect.value} ${telephoneInput.value.trim()}`,
 
 
             niveau:

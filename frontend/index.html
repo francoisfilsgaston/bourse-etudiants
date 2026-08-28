@@ -123,10 +123,19 @@
                         <div class="input-group">
                             <label for="telephone">Téléphone</label>
 
-                            <div class="input-box">
-                                <i class="fa-solid fa-phone"></i>
+                            <div class="phone-fields">
+                                <div class="input-box phone-code-box">
+                                    <select id="indicatifTelephone" aria-label="Indicatif téléphonique" required>
+                                        <option value="">Code</option>
+                                    </select>
+                                </div>
 
-                                <input type="tel" id="telephone" name="telephone" placeholder="+243..." required>
+                                <div class="input-box phone-number-box">
+                                    <i class="fa-solid fa-phone"></i>
+
+                                    <input type="tel" id="telephone" name="telephone" inputmode="numeric"
+                                        placeholder="Numéro sans indicatif" required>
+                                </div>
                             </div>
                         </div>
 
