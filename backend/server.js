@@ -2,8 +2,10 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
+
+const countriesApi = "https://countriesnow.space/api/v0.1/countries";
+const universitiesApi = "https://api.openalex.org/institutions?filter=country_code:";
 
 const phoneLengths = {
     CD: [9, 9], FR: [9, 9], CG: [9, 9], CM: [9, 9], CI: [10, 10],
@@ -22,7 +24,6 @@ const phoneLengths = {
 // =====================================================
 
 app.use(cors());
-
 app.use(express.json());
 
 
@@ -45,45 +46,28 @@ app.get("/", (req, res) => {
 // =====================================================
 
 app.get("/api/pays", async (req, res) => {
-
     try {
-
         console.log("🌍 Récupération des pays...");
 
-        const url =
-            "https://raw.githubusercontent.com/umpirsky/country-list/master/data/en/country.json";
+        console.log("🔗 URL pays :", countriesApi);
 
-
-        console.log("🔗 URL pays :", url);
-
-
-        const response =
-            await fetch(url);
-
-
+        const response = await fetch(countriesApi);
         console.log(
-            "📡 HTTP REST Countries :",
+            "📡 HTTP CountriesNow :",
             response.status
         );
 
-
         if (!response.ok) {
-
-            throw new Error(
-                `REST Countries HTTP ${response.status}`
-            );
-
+            throw new Error(`CountriesNow HTTP ${response.status}`);
         }
 
-
-        const countries =
-            await response.json();
+        const result = await response.json();
+        const countries = Array.isArray(result?.data) ? result.data : [];
 
         let phoneCodes = {};
 
         try {
-            const phoneResponse =
-                await fetch("https://country.io/phone.json");
+            const phoneResponse = await fetch("https://country.io/phone.json");
 
             if (phoneResponse.ok) {
                 phoneCodes = await phoneResponse.json();
@@ -92,311 +76,212 @@ app.get("/api/pays", async (req, res) => {
             console.warn("Indicatifs téléphoniques indisponibles :", phoneError.message);
         }
 
-
-        if (!countries || typeof countries !== "object" || Array.isArray(countries)) {
-
-            throw new Error(
-                "La source des pays n'a pas retourné un objet valide"
-            );
-
+        if (!Array.isArray(countries)) {
+            throw new Error("La source des pays n'a pas retourné un tableau valide");
         }
 
+        const pays = countries
+            .filter(country => country && country.country)
+            .map(country => ({
+                name: country.country,
+                code: country.iso2 || "",
+                flag: (country.iso2 || "")
+                    .toUpperCase()
+                    .replace(/[A-Z]/g, letter =>
+                        String.fromCodePoint(127397 + letter.charCodeAt(0))
+                    ),
+                dialCode: phoneCodes[country.iso2]
+                    ? `+${phoneCodes[country.iso2]}`
+                    : "",
+                minLength: phoneLengths[country.iso2]
+                    ? phoneLengths[country.iso2][0]
+                    : 6,
+                maxLength: phoneLengths[country.iso2]
+                    ? phoneLengths[country.iso2][1]
+                    : 15
+            }))
+            .filter(country => country.name);
 
-        const pays =
-            Object.entries(countries)
-                .map(([code, name]) => ({
-                    name,
-                    code,
-                    flag: code
-                        .toUpperCase()
-                        .replace(/[A-Z]/g, letter =>
-                            String.fromCodePoint(
-                                127397 + letter.charCodeAt(0)
-                            )
-                        ),
-                    dialCode: phoneCodes[code]
-                        ? `+${phoneCodes[code]}`
-                        : "",
-                    minLength: phoneLengths[code]
-                        ? phoneLengths[code][0]
-                        : 6,
-                    maxLength: phoneLengths[code]
-                        ? phoneLengths[code][1]
-                        : 15
-                }))
-                .filter(country => country.name);
-
-
-        console.log(
-            `✅ ${pays.length} pays récupérés`
-        );
-
+        console.log(`✅ ${pays.length} pays récupérés`);
 
         res.json({
-
             success: true,
-
-            data:
-                pays
-
+            data: pays
         });
-
 
     } catch (error) {
-
-        console.error(
-            "❌ ERREUR API PAYS :",
-            error
-        );
-
+        console.error("❌ ERREUR API PAYS :", error);
 
         res.status(500).json({
-
             success: false,
-
             data: null,
-
-            message:
-                "Impossible de récupérer les pays",
-
-            error:
-                error.message
-
+            message: "Impossible de récupérer les pays",
+            error: error.message
         });
-
     }
-
 });
 
+
+function normalizeCountryName(value) {
+    return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+}
+
+async function getCountryCodeByName(countryName) {
+    const target = normalizeCountryName(countryName);
+
+    if (!target) {
+        return null;
+    }
+
+    const response = await fetch(countriesApi);
+
+    if (!response.ok) {
+        throw new Error(`CountriesNow HTTP ${response.status}`);
+    }
+
+    const result = await response.json();
+    const countries = Array.isArray(result?.data) ? result.data : [];
+
+    const found = countries.find(country => {
+        if (!country || !country.country) {
+            return false;
+        }
+
+        const candidate = normalizeCountryName(country.country);
+        return candidate === target ||
+            candidate.includes(target) ||
+            target.includes(candidate);
+    });
+
+    return found ? (found.iso2 || null) : null;
+}
 
 // =====================================================
 // API UNIVERSITÉS
 // =====================================================
 
 app.get("/api/universites", async (req, res) => {
-
     try {
-
-        const pays =
-            req.query.country;
-
+        const pays = req.query.country;
 
         console.log("");
-        console.log(
-            "🎓 Pays demandé :",
-            pays
-        );
-
-
-        // ---------------------------------------------
-        // Vérification du pays
-        // ---------------------------------------------
+        console.log("🎓 Pays demandé :", pays);
 
         if (!pays) {
-
             return res.status(400).json({
-
                 success: false,
-
                 data: [],
-
-                message:
-                    "Le paramètre country est obligatoire"
-
+                message: "Le paramètre country est obligatoire"
             });
-
         }
 
+        const countryCode = await getCountryCodeByName(pays);
 
-        // ---------------------------------------------
-        // API UNIVERSITÉS
-        // ---------------------------------------------
-
-        /*
-         * IMPORTANT :
-         *
-         * HTTP fonctionne dans ton environnement.
-         *
-         * HTTPS provoquait :
-         *
-         * ETIMEDOUT ...:443
-         *
-         */
-
-        const url =
-            "http://universities.hipolabs.com/search?country=" +
-            encodeURIComponent(pays);
-
-
-        console.log(
-            "🔗 URL universités :",
-            url
-        );
-
-
-        // ---------------------------------------------
-        // Appel API
-        // ---------------------------------------------
-
-        const response =
-            await fetch(url);
-
-
-        console.log(
-            "📡 HTTP universités :",
-            response.status
-        );
-
-
-        if (!response.ok) {
-
-            const texte =
-                await response.text();
-
-
-            console.error(
-                "❌ Réponse API :",
-                texte
-            );
-
-
-            throw new Error(
-                `API universités HTTP ${response.status}`
-            );
-
+        if (!countryCode) {
+            return res.status(404).json({
+                success: false,
+                data: [],
+                message: `Aucun code pays trouvé pour ${pays}`
+            });
         }
 
+        const institutions = [];
+        let page = 1;
+        const maxPages = 20;
 
-        // ---------------------------------------------
-        // JSON
-        // ---------------------------------------------
+        while (page <= maxPages) {
+            const url = `${universitiesApi}${countryCode}&per-page=200&page=${page}`;
 
-        const universites =
-            await response.json();
+            console.log("🔗 URL universités :", url);
 
+            const response = await fetch(url);
+            console.log("📡 HTTP universités :", response.status);
 
-        console.log(
-            "📦 Type reçu :",
-            Array.isArray(universites)
-                ? "Array"
-                : typeof universites
-        );
+            if (!response.ok) {
+                const texte = await response.text();
+                console.error("❌ Réponse API :", texte);
+                throw new Error(`API universités HTTP ${response.status}`);
+            }
 
+            const data = await response.json();
+            const results = Array.isArray(data?.results) ? data.results : [];
 
-        console.log(
-            "🎓 Nombre reçu :",
-            Array.isArray(universites)
-                ? universites.length
-                : 0
-        );
+            if (!results.length) {
+                break;
+            }
 
+            institutions.push(...results);
 
-        // ---------------------------------------------
-        // Vérification
-        // ---------------------------------------------
+            if (results.length < 200) {
+                break;
+            }
 
-        if (!Array.isArray(universites)) {
+            if (data?.meta?.count && institutions.length >= data.meta.count) {
+                break;
+            }
 
-            throw new Error(
-                "L'API universités n'a pas retourné un tableau"
-            );
-
+            page += 1;
         }
 
-
-        // ---------------------------------------------
-        // Nettoyage
-        // ---------------------------------------------
-
-        const resultat =
-            universites
-
-                .filter(universite =>
-                    universite &&
-                    universite.name
-                )
-
-                .map(universite => ({
-
-                    name:
-                        universite.name,
-
-                    country:
-                        universite.country || pays,
-
-                    alpha_two_code:
-                        universite.alpha_two_code || "",
-
-                    domains:
-                        Array.isArray(
-                            universite.domains
-                        )
-                            ? universite.domains
-                            : [],
-
-                    web_pages:
-                        Array.isArray(
-                            universite.web_pages
-                        )
-                            ? universite.web_pages
-                            : []
-
-                }));
-
-
-        console.log(
-            `✅ ${resultat.length} universités trouvées pour ${pays}`
+        const uniqueInstitutions = Array.from(
+            new Map(
+                institutions
+                    .filter(item => item && item.display_name)
+                    .map(item => [item.display_name, item])
+            ).values()
         );
 
+        const resultat = uniqueInstitutions.map(institution => {
+            const homepage = typeof institution.homepage_url === "string"
+                ? institution.homepage_url
+                : "";
 
-        // ---------------------------------------------
-        // Réponse
-        // ---------------------------------------------
+            let domain = "";
+            if (homepage) {
+                try {
+                    const parsed = new URL(homepage);
+                    domain = parsed.hostname.replace(/^www\./i, "");
+                } catch (error) {
+                    domain = "";
+                }
+            }
+
+            return {
+                name: institution.display_name,
+                country: institution.country_code || pays,
+                alpha_two_code: institution.country_code || "",
+                domains: domain ? [domain] : [],
+                web_pages: homepage ? [homepage] : [],
+                homepage_url: homepage,
+                type: institution.type || "",
+                id: institution.id || ""
+            };
+        });
+
+        console.log(`✅ ${resultat.length} universités trouvées pour ${pays}`);
 
         res.json({
-
             success: true,
-
-            data:
-                resultat
-
+            data: resultat
         });
-
 
     } catch (error) {
-
-        console.error(
-            "❌ ERREUR API UNIVERSITÉS :",
-            error
-        );
-
+        console.error("❌ ERREUR API UNIVERSITÉS :", error);
 
         res.status(500).json({
-
             success: false,
-
             data: [],
-
-            message:
-                "Impossible de récupérer les universités",
-
-            error:
-                error.message,
-
-            cause:
-                error.cause
-                    ? error.cause.message
-                    : null,
-
-            code:
-                error.cause
-                    ? error.cause.code
-                    : null
-
+            message: "Impossible de récupérer les universités",
+            error: error.message,
+            cause: error.cause ? error.cause.message : null,
+            code: error.cause ? error.cause.code : null
         });
-
     }
-
 });
 
 
@@ -405,74 +290,42 @@ app.get("/api/universites", async (req, res) => {
 // =====================================================
 
 app.get("/test-universites", async (req, res) => {
-
     try {
-
         const pays = "Algeria";
+        const countryCode = await getCountryCodeByName(pays);
 
+        if (!countryCode) {
+            return res.status(404).json({
+                success: false,
+                message: `Aucun code pays trouvé pour ${pays}`
+            });
+        }
 
-        const url =
-            "http://universities.hipolabs.com/search?country=" +
-            encodeURIComponent(pays);
+        const url = `${universitiesApi}${countryCode}&per-page=5&page=1`;
 
+        console.log("🧪 Test universités :", url);
 
-        console.log(
-            "🧪 Test universités :",
-            url
-        );
+        const response = await fetch(url);
+        console.log("📡 Status :", response.status);
 
-
-        const response =
-            await fetch(url);
-
-
-        console.log(
-            "📡 Status :",
-            response.status
-        );
-
-
-        const data =
-            await response.json();
-
+        const data = await response.json();
+        const results = Array.isArray(data?.results) ? data.results : [];
 
         res.json({
-
             success: true,
-
-            nombre:
-                data.length,
-
-            data:
-                data.slice(0, 5)
-
+            nombre: results.length,
+            data: results.slice(0, 5)
         });
-
 
     } catch (error) {
-
-        console.error(
-            "❌ TEST UNIVERSITÉS :",
-            error
-        );
-
+        console.error("❌ TEST UNIVERSITÉS :", error);
 
         res.status(500).json({
-
             success: false,
-
-            error:
-                error.message,
-
-            cause:
-                error.cause
-                    ? error.cause.message
-                    : null
-
+            error: error.message,
+            cause: error.cause ? error.cause.message : null
         });
-
     }
-
 });
 
 
