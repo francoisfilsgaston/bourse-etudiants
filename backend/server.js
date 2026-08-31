@@ -4,9 +4,6 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const countriesApi = "https://countriesnow.space/api/v0.1/countries";
-const universitiesApi = "https://api.openalex.org/institutions?filter=country_code:";
-
 const phoneLengths = {
     CD: [9, 9], FR: [9, 9], CG: [9, 9], CM: [9, 9], CI: [10, 10],
     SN: [9, 9], BJ: [10, 10], BF: [8, 8], ML: [8, 8], NE: [8, 8],
@@ -41,6 +38,48 @@ app.get("/", (req, res) => {
 });
 
 
+const countriesApi = "https://countriesnow.space/api/v0.1/countries";
+const universitiesApi = "https://api.openalex.org/institutions?filter=country_code:";
+
+function normalizeCountryName(value) {
+    return String(value || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+}
+
+async function getCountryCodeByName(countryName) {
+    const target = normalizeCountryName(countryName);
+
+    if (!target) {
+        return null;
+    }
+
+    const response = await fetch(countriesApi);
+    if (!response.ok) {
+        throw new Error(`CountriesNow HTTP ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const countries = Array.isArray(payload?.data) ? payload.data : [];
+
+    const found = countries.find(country => {
+        if (!country || !country.country) {
+            return false;
+        }
+
+        const candidate = normalizeCountryName(country.country);
+        return candidate === target ||
+            candidate.includes(target) ||
+            target.includes(candidate) ||
+            (country.iso2 && country.iso2.toLowerCase() === target);
+    });
+
+    return found ? (found.iso2 || null) : null;
+}
+
 // =====================================================
 // API PAYS
 // =====================================================
@@ -52,23 +91,19 @@ app.get("/api/pays", async (req, res) => {
         console.log("🔗 URL pays :", countriesApi);
 
         const response = await fetch(countriesApi);
-        console.log(
-            "📡 HTTP CountriesNow :",
-            response.status
-        );
+        console.log("📡 HTTP CountriesNow :", response.status);
 
         if (!response.ok) {
             throw new Error(`CountriesNow HTTP ${response.status}`);
         }
 
-        const result = await response.json();
-        const countries = Array.isArray(result?.data) ? result.data : [];
+        const payload = await response.json();
+        const countries = Array.isArray(payload?.data) ? payload.data : [];
 
         let phoneCodes = {};
 
         try {
             const phoneResponse = await fetch("https://country.io/phone.json");
-
             if (phoneResponse.ok) {
                 phoneCodes = await phoneResponse.json();
             }
@@ -87,18 +122,10 @@ app.get("/api/pays", async (req, res) => {
                 code: country.iso2 || "",
                 flag: (country.iso2 || "")
                     .toUpperCase()
-                    .replace(/[A-Z]/g, letter =>
-                        String.fromCodePoint(127397 + letter.charCodeAt(0))
-                    ),
-                dialCode: phoneCodes[country.iso2]
-                    ? `+${phoneCodes[country.iso2]}`
-                    : "",
-                minLength: phoneLengths[country.iso2]
-                    ? phoneLengths[country.iso2][0]
-                    : 6,
-                maxLength: phoneLengths[country.iso2]
-                    ? phoneLengths[country.iso2][1]
-                    : 15
+                    .replace(/[A-Z]/g, letter => String.fromCodePoint(127397 + letter.charCodeAt(0))),
+                dialCode: phoneCodes[country.iso2] ? `+${phoneCodes[country.iso2]}` : "",
+                minLength: phoneLengths[country.iso2] ? phoneLengths[country.iso2][0] : 6,
+                maxLength: phoneLengths[country.iso2] ? phoneLengths[country.iso2][1] : 15
             }))
             .filter(country => country.name);
 
@@ -121,45 +148,6 @@ app.get("/api/pays", async (req, res) => {
     }
 });
 
-
-function normalizeCountryName(value) {
-    return String(value || "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, " ")
-        .trim();
-}
-
-async function getCountryCodeByName(countryName) {
-    const target = normalizeCountryName(countryName);
-
-    if (!target) {
-        return null;
-    }
-
-    const response = await fetch(countriesApi);
-
-    if (!response.ok) {
-        throw new Error(`CountriesNow HTTP ${response.status}`);
-    }
-
-    const result = await response.json();
-    const countries = Array.isArray(result?.data) ? result.data : [];
-
-    const found = countries.find(country => {
-        if (!country || !country.country) {
-            return false;
-        }
-
-        const candidate = normalizeCountryName(country.country);
-        return candidate === target ||
-            candidate.includes(target) ||
-            target.includes(candidate);
-    });
-
-    return found ? (found.iso2 || null) : null;
-}
 
 // =====================================================
 // API UNIVERSITÉS
@@ -196,7 +184,6 @@ app.get("/api/universites", async (req, res) => {
 
         while (page <= maxPages) {
             const url = `${universitiesApi}${countryCode}&per-page=200&page=${page}`;
-
             console.log("🔗 URL universités :", url);
 
             const response = await fetch(url);
@@ -237,11 +224,9 @@ app.get("/api/universites", async (req, res) => {
         );
 
         const resultat = uniqueInstitutions.map(institution => {
-            const homepage = typeof institution.homepage_url === "string"
-                ? institution.homepage_url
-                : "";
-
+            const homepage = typeof institution.homepage_url === "string" ? institution.homepage_url : "";
             let domain = "";
+
             if (homepage) {
                 try {
                     const parsed = new URL(homepage);
@@ -291,7 +276,7 @@ app.get("/api/universites", async (req, res) => {
 
 app.get("/test-universites", async (req, res) => {
     try {
-        const pays = "Algeria";
+        const pays = "Burundi";
         const countryCode = await getCountryCodeByName(pays);
 
         if (!countryCode) {
